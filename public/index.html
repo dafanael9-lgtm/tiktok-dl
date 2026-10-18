@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TikTok No-WM Downloader</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,sans-serif;
+       background:radial-gradient(circle at 30% 20%,#111,#000);color:#eee;padding:24px}
+  .card{width:100%;max-width:520px;background:#161616;border:1px solid #262626;border-radius:16px;padding:28px}
+  h1{margin:0 0 4px;font-size:22px}
+  p.sub{margin:0 0 20px;color:#888;font-size:13px}
+  .row{display:flex;gap:8px}
+  input{flex:1;padding:12px 14px;border-radius:10px;border:1px solid #2a2a2a;background:#0d0d0d;color:#eee;font-size:14px;outline:none}
+  input:focus{border-color:#ff0050}
+  button{padding:12px 18px;border:none;border-radius:10px;background:#ff0050;color:#fff;font-weight:600;cursor:pointer;font-size:14px}
+  button:disabled{opacity:.5;cursor:wait}
+  .result{margin-top:20px;display:none}
+  .result.show{display:block}
+  .thumb{width:100%;border-radius:10px;margin-bottom:12px}
+  .meta{font-size:12px;color:#888;margin-bottom:12px}
+  a.dl{display:block;text-align:center;padding:12px;border-radius:10px;background:#ff0050;color:#fff;text-decoration:none;font-weight:600;margin-top:8px}
+  a.audio{background:#222}
+  .err{color:#ff6b6b;font-size:13px;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>TikTok No-WM Downloader</h1>
+  <p class="sub">Tempel link video TikTok, dapet file tanpa watermark.</p>
+  <div class="row">
+    <input id="url" placeholder="https://www.tiktok.com/@user/video/..." />
+    <button id="go">Download</button>
+  </div>
+  <div class="err" id="err"></div>
+  <div class="result" id="result">
+    <img class="thumb" id="cover" />
+    <div class="meta" id="meta"></div>
+    <a class="dl" id="dl" target="_blank">Download Video (No WM)</a>
+    <a class="dl audio" id="audio" target="_blank">Download Audio</a>
+  </div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+$("go").onclick = async () => {
+  const url = $("url").value.trim();
+  $("err").textContent = "";
+  $("result").classList.remove("show");
+  if(!url) { $("err").textContent = "Isi link dulu, bree."; return; }
+  $("go").disabled = true; $("go").textContent = "Resolving...";
+  try {
+    const r = await fetch(`/api/resolve?url=${encodeURIComponent(url)}`);
+    const j = await r.json();
+    if(!r.ok) throw new Error(j.error || "Gagal");
+    $("cover").src = j.cover;
+    $("meta").textContent = `@${j.author} • ${j.duration}s • ${j.stats.play.toLocaleString()} plays`;
+    $("dl").href = j.play;
+    $("audio").href = j.music;
+    $("result").classList.add("show");
+  } catch(e) {
+    $("err").textContent = e.message;
+  } finally {
+    $("go").disabled = false; $("go").textContent = "Download";
+  }
+};
+</script>
+</body>
+  </html>
